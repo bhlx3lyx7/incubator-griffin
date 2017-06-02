@@ -6,12 +6,12 @@
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
         <version>17</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.apache.griffin</groupId>
     <artifactId>griffin</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Apache Griffin ${project.version}</name>
     <url>http://griffin.incubator.apache.org</url>
