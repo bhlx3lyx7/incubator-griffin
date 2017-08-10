@@ -106,7 +106,7 @@ case class StreamingAccuracyProcess(sourceDataConnector: DirectDataConnector,
           val updatedCacheResultOpt = cacheResultProcesser.genUpdateCacheResult(t, updateTime, res)
 
           updatedCacheResultOpt.flatMap { updatedCacheResult =>
-            Some((updatedCacheResult, (t, missData)))
+            Some((updatedCacheResult, (t, missData, updatedCacheResult.isOriginal)))
           }
         }
 
@@ -129,7 +129,7 @@ case class StreamingAccuracyProcess(sourceDataConnector: DirectDataConnector,
 
         // record missing data and dump old data (in executor)
         updateDataPart.foreach { grp =>
-          val (t, datas) = grp
+          val (t, datas, isOriginal) = grp
           val persist: Persist = persistFactory.getPersists(t)
           // persist missing data
           val missStrings = datas.map { row =>
@@ -138,12 +138,14 @@ case class StreamingAccuracyProcess(sourceDataConnector: DirectDataConnector,
           persist.records(missStrings, PersistType.MISS)
 
           // data connector update old data
-          val dumpDatas = datas.map { r =>
-            val (_, (v, i)) = r
-            v ++ i
+          if (!isOriginal) {  // ignore the all miss group at first time, save some persist time
+            val dumpDatas = datas.map { r =>
+              val (_, (v, i)) = r
+              v ++ i
+            }
+            sourceDataConnector.updateOldData(t, dumpDatas)
+//          targetDataConnector.updateOldData(t, dumpDatas)    // not correct
           }
-          sourceDataConnector.updateOldData(t, dumpDatas)
-          //          targetDataConnector.updateOldData(t, dumpDatas)    // not correct
         }
 
         updateResults.unpersist()

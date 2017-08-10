@@ -25,6 +25,7 @@ trait Result extends Serializable {
 
   def update(delta: T): T
 
+  def original(): Boolean
   def eventual(): Boolean
 
   def differsFrom(other: T): Boolean

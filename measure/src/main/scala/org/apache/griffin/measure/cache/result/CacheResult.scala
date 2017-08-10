@@ -26,4 +26,6 @@ case class CacheResult(timeGroup: Long, updateTime: Long, result: Result) {
     updateTime < ut
   }
 
+  def isOriginal(): Boolean = result.original()
+
 }
