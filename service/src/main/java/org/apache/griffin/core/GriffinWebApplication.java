@@ -20,18 +20,25 @@ package org.apache.griffin.core;
 
 
 import org.apache.griffin.core.common.SimpleCORSFilter;
+import org.apache.griffin.core.measure.newEntity.*;
+import org.apache.griffin.core.measure.newEntity.repo.NewMeasureRepo;
+import org.apache.griffin.core.util.GriffinUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.Arrays;
+
 //import org.apache.griffin.core.measure.repo.ConnectorConfigRepo;
 
 @SpringBootApplication
 @EnableScheduling
-public class GriffinWebApplication/* implements CommandLineRunner*/{
+public class GriffinWebApplication implements CommandLineRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(GriffinWebApplication.class);
     public static void main(String[] args) {
         LOGGER.info("application start");
@@ -78,9 +85,33 @@ public class GriffinWebApplication/* implements CommandLineRunner*/{
 //        measureRepo.save(measure3);
 //    }
 
+
+    @Autowired
+    NewMeasureRepo newMeasureRepo;
+
+    @Override
+    public void run(String... strings) throws Exception {
+        DataConnector dataConnector1=new DataConnector(DataConnector.ConnectorType.avro,"1.0.1","config1");
+        DataConnector dataConnector2=new DataConnector(DataConnector.ConnectorType.avro,"1.0.1","config2");
+
+        DataSource dataSource1=new DataSource("dataSource1", Arrays.asList(dataConnector1,dataConnector2));
+        DataSource dataSource2=new DataSource("dataSource1", Arrays.asList(dataConnector1,dataConnector2));
+
+
+        Rule rule=new Rule(Rule.DSLType.griffinDsl, Rule.DQType.accuracy,"select count(name) from A");
+        EvaluateRule evaluateRule=new EvaluateRule(Arrays.asList(rule));
+
+        NewMeasure newMeasure=new NewMeasure("newMeasure1", NewMeasure.ProcessType.batch,Arrays.asList(dataSource1,dataSource2),evaluateRule);
+        newMeasureRepo.save(newMeasure);
+
+        LOGGER.info("newMeasureJson:\n"+ GriffinUtil.toJson(newMeasure));
+
+    }
+
     @Bean
     public SimpleCORSFilter simpleFilter() {
         return new SimpleCORSFilter();
     }
+
 
 }

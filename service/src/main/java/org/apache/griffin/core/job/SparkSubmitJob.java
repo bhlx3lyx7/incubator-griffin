@@ -21,8 +21,6 @@ package org.apache.griffin.core.job;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.griffin.core.job.entity.JobInstance;
 import org.apache.griffin.core.job.entity.LivySessionStates;
@@ -87,7 +85,7 @@ public class SparkSubmitJob implements Job {
         JobDetail jd = context.getJobDetail();
         String groupName=jd.getJobDataMap().getString("groupName");
         String jobName=jd.getJobDataMap().getString("jobName");
-        init(jd);
+        initParam(jd);
         //prepare current system timestamp
         long currentblockStartTimestamp = setCurrentblockStartTimestamp(System.currentTimeMillis());
         LOGGER.info("currentblockStartTimestamp: "+currentblockStartTimestamp);
@@ -106,8 +104,7 @@ public class SparkSubmitJob implements Job {
         saveJobInstance(groupName,jobName,result);
     }
 
-    public void init(JobDetail jd){
-        //jd.getJobDataMap().getString()
+    public void initParam(JobDetail jd){
         /**
          * the field measureId is generated from `setJobData` in `JobServiceImpl`
          */
@@ -115,8 +112,8 @@ public class SparkSubmitJob implements Job {
         measure = measureRepo.findOne(Long.valueOf(measureId));
         if (measure==null) {
             LOGGER.error("Measure with id " + measureId + " is not find!");
-            //if return here, livy uri won't be set, and will keep null for all measures even they are not null
         }
+        setMeasureInstanceName(measure,jd);
         String partitionItemstr = sparkJobProps.getProperty("sparkJob.dateAndHour");
         partitionItems = partitionItemstr.split(",");
         uri = sparkJobProps.getProperty("livy.uri");
@@ -126,6 +123,11 @@ public class SparkSubmitJob implements Job {
         lastBlockStartTimestamp = jd.getJobDataMap().getString("lastBlockStartTimestamp");
         LOGGER.info("lastBlockStartTimestamp:"+lastBlockStartTimestamp);
         interval = jd.getJobDataMap().getString("interval");
+    }
+
+    private void setMeasureInstanceName(Measure measure, JobDetail jd){
+        // in order to keep metric name unique, we set measure name as jobName at present
+        measure.setName(jd.getJobDataMap().getString("jobName"));
     }
 
     public void setDataConnectorPartitions(DataConnector dc, String[] patternItemSet, String[] partitionItems, long timestamp) {
@@ -195,13 +197,9 @@ public class SparkSubmitJob implements Job {
 
         List<String> args = new ArrayList<String>();
         args.add(sparkJobProps.getProperty("sparkJob.args_1"));
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String measureJson = "";
-        try {
-            measureJson = ow.writeValueAsString(measure);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        // measure
+        String measureJson;
+        measureJson = GriffinUtil.toJson(measure);
         args.add(measureJson);  //partition
         args.add(sparkJobProps.getProperty("sparkJob.args_3"));
         sparkJobDO.setArgs(args);

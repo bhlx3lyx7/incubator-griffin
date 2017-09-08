@@ -27,7 +27,6 @@ import javax.persistence.*;
 
 @Entity
 public class Measure extends AuditableEntity   {
-
     private static final long serialVersionUID = -4748881017029815794L;
 
     private String name;

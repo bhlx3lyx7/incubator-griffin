@@ -23,6 +23,7 @@ package org.apache.griffin.core.measure.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
+import javax.persistence.Table;
 
 @Entity
 public class EvaluateRule  extends AuditableEntity {
