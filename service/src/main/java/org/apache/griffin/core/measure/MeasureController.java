@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class MeasureController {
     @Autowired
-    MeasureService measureService;
+    private MeasureService measureService;
 
     @RequestMapping(value = "/measures",method = RequestMethod.GET)
     public Iterable<Measure> getAllAliveMeasures() {

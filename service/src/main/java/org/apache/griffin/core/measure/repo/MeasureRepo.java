@@ -20,14 +20,10 @@ under the License.
 package org.apache.griffin.core.measure.repo;
 
 
-import org.apache.griffin.core.measure.entity.DataConnector;
-import org.apache.griffin.core.measure.entity.EvaluateRule;
 import org.apache.griffin.core.measure.entity.Measure;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -47,9 +43,9 @@ public interface MeasureRepo extends CrudRepository<Measure, Long> {
             "where m.name= ?1")
     String findOrgByName(String measureName);
 
-    @Modifying
-    @Transactional
-    @Query("update Measure m "+
-            "set m.description= ?2,m.organization= ?3,m.source= ?4,m.target= ?5,m.evaluateRule= ?6 where m.id= ?1")
-    void update(Long Id, String description, String organization, DataConnector source, DataConnector target, EvaluateRule evaluateRule);
+//    @Modifying
+//    @Transactional
+//    @Query("update Measure m "+
+//            "set m.description= ?2,m.organization= ?3,m.source= ?4,m.target= ?5,m.evaluateRule= ?6 where m.id= ?1")
+//    void update(Long Id, String description, String organization, DataConnector source, DataConnector target, EvaluateRule evaluateRule);
 }

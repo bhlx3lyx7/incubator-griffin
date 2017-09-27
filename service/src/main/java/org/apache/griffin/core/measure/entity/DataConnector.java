@@ -19,41 +19,25 @@ under the License.
 
 package org.apache.griffin.core.measure.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.griffin.core.measure.entity.AuditableEntity;
 import org.apache.griffin.core.util.GriffinUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.io.IOException;
 import java.util.Map;
 
 @Entity
-public class DataConnector extends AuditableEntity  {
+public class DataConnector extends AuditableEntity{
+    private static final long serialVersionUID = -4748881017029815594L;
+
     private final static Logger log = LoggerFactory.getLogger(DataConnector.class);
 
-    private static final long serialVersionUID = -4748881017029815794L;
-    
-    public enum ConnectorType {
-        HIVE
-    }
-    
-    @Enumerated(EnumType.STRING)
-    private ConnectorType type;
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
+    private String type;
 
     private String version;
 
@@ -69,41 +53,42 @@ public class DataConnector extends AuditableEntity  {
             try {
                 this.configInMaps = GriffinUtil.toEntity(config, mapType);
             } catch (IOException e) {
-                log.error("Error in converting json to map",e);
+                log.error("Error in converting json to map.{}",e);
             }
         }
         return configInMaps;
     }
 
     public void setConfig(Map<String,String> configInMaps) throws JsonProcessingException {
-        String configJson = GriffinUtil.toJson(configInMaps);
-        this.config = configJson;
-    }
-
-    public ConnectorType getType() {
-        return type;
-    }
-
-    public void setType(ConnectorType type) {
-        this.type = type;
+        this.config = GriffinUtil.toJson(configInMaps);
     }
 
     public Map<String,String> getConfig() {
         return getConfigInMaps();
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+
 
     public DataConnector() {
     }
 
-    public DataConnector(ConnectorType type,String version, Map<String,String> config){
-        this.type = type;
-        this.version = version;
-        this.configInMaps = config;
-        this.config = GriffinUtil.toJson(configInMaps);
-    }
-
-    public DataConnector(ConnectorType type, String version, String config) {
+    public DataConnector(String type, String version, String config) {
         this.type = type;
         this.version = version;
         this.config = config;

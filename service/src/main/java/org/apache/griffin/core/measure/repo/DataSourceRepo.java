@@ -16,21 +16,11 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
 */
-package org.apache.griffin.core.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+package org.apache.griffin.core.measure.repo;
 
-@Component
-public class CacheEvictor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CacheEvictor.class);
+import org.apache.griffin.core.measure.entity.DataSource;
+import org.springframework.data.repository.CrudRepository;
 
-    @Scheduled(fixedRateString = "${cache.evict.hive.fixedRate.in.milliseconds}")
-    @CacheEvict(cacheNames = "hive", allEntries = true, beforeInvocation = true)
-    public void evictHiveCache() {
-        LOGGER.info("Evict hive cache");
-    }
+public interface DataSourceRepo extends CrudRepository<DataSource,Long> {
 }

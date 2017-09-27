@@ -61,11 +61,11 @@ public class JobServiceImpl implements JobService {
     private static final Logger LOGGER = LoggerFactory.getLogger(JobServiceImpl.class);
 
     @Autowired
-    SchedulerFactoryBean factory;
+    private SchedulerFactoryBean factory;
     @Autowired
-    JobInstanceRepo jobInstanceRepo;
+    private JobInstanceRepo jobInstanceRepo;
     @Autowired
-    Properties sparkJobProps;
+    private Properties sparkJobProps;
 
     public JobServiceImpl(){
     }

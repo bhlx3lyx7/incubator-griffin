@@ -20,7 +20,6 @@ under the License.
 package org.apache.griffin.core.service;
 
 
-import org.apache.griffin.core.measure.entity.Measure;
 import org.apache.griffin.core.measure.repo.MeasureRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,32 +72,32 @@ public class GriffinController {
         return orgWithMetricsMap;
     }
 
-    @RequestMapping(value = "/dataAssetsNameWithMetricsName",method = RequestMethod.GET)
-    public Map<String,List<String>> getDataAssetsNameWithMetricsName(){
-        Map<String,List<String>> daWithMetricsMap=new HashMap<>();
-        Iterable<Measure> measureList=measureRepo.findAll();
-        for (Measure m:measureList){
-            switch (m.getType()){
-                case accuracy:
-                    String[] tableNames={m.getSource().getConfigInMaps().get("table.name"),m.getTarget().getConfigInMaps().get("table.name")};
-                    for (String taName:tableNames){
-                        if(taName!=null) {
-                            if(daWithMetricsMap.get(taName)==null){
-                                daWithMetricsMap.put(taName, new ArrayList<>(Arrays.asList(m.getName())));
-                            }else{
-                                List<String> measureNameList=daWithMetricsMap.get(taName);
-                                measureNameList.add(m.getName());
-                                daWithMetricsMap.put(taName, measureNameList);
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    LOGGER.info("invalid measure type!");
-            }
-        }
-        return daWithMetricsMap;
-    }
+//    @RequestMapping(value = "/dataAssetsNameWithMetricsName",method = RequestMethod.GET)
+//    public Map<String,List<String>> getDataAssetsNameWithMetricsName(){
+//        Map<String,List<String>> daWithMetricsMap=new HashMap<>();
+//        Iterable<Measure> measureList=measureRepo.findAll();
+//        for (Measure m:measureList){
+//            switch (m.getType()){
+//                case accuracy:
+//                    String[] tableNames={m.getSource().getConfigInMaps().get("table.name"),m.getTarget().getConfigInMaps().get("table.name")};
+//                    for (String taName:tableNames){
+//                        if(taName!=null) {
+//                            if(daWithMetricsMap.get(taName)==null){
+//                                daWithMetricsMap.put(taName, new ArrayList<>(Arrays.asList(m.getName())));
+//                            }else{
+//                                List<String> measureNameList=daWithMetricsMap.get(taName);
+//                                measureNameList.add(m.getName());
+//                                daWithMetricsMap.put(taName, measureNameList);
+//                            }
+//                        }
+//                    }
+//                    break;
+//                default:
+//                    LOGGER.info("invalid measure type!");
+//            }
+//        }
+//        return daWithMetricsMap;
+//    }
 
 }
 
