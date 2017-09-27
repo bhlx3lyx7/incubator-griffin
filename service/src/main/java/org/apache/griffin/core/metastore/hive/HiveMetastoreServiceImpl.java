@@ -40,22 +40,21 @@ import java.util.Map;
 
 @Service
 @CacheConfig(cacheNames = "hive")
-public class HiveMetastoreServiceImpl implements HiveMetastoreService{
+public class HiveMetastoreServiceImpl implements HiveMetastoreService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetastoreServiceImpl.class);
 
     @Autowired
     private HiveMetaStoreClient client;
-    //TODO: wrap HiveMetaStoreClient to manage hive connection, when hive connection fails, evict hive cache.
-    //Note that if the hive connection is down, the following methods won't throw exception because it isn't executed
-    //because of cache.
 
     @Value("${hive.metastore.dbname}")
     private String defaultDbName;
 
     private String getUseDbName(String dbName) {
-        if (!StringUtils.hasText(dbName)) return defaultDbName;
-        else return dbName;
+        if (!StringUtils.hasText(dbName))
+            return defaultDbName;
+        else
+            return dbName;
     }
 
     @Override
@@ -66,7 +65,7 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService{
             results = client.getAllDatabases();
         } catch (MetaException e) {
             reconnect();
-            LOGGER.error("Can not get databases : ",e.getMessage());
+            LOGGER.error("Can not get databases : ", e.getMessage());
         }
         return results;
     }
@@ -76,9 +75,8 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService{
     @Cacheable
     public Iterable<String> getAllTableNames(String dbName) {
         Iterable<String> results = null;
-        String useDbName = getUseDbName(dbName);
         try {
-            results = client.getAllTables(useDbName);
+            results = client.getAllTables(getUseDbName(dbName));
         } catch (Exception e) {
             reconnect();
             LOGGER.error("Exception fetching tables info: " + e.getMessage());
@@ -90,41 +88,17 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService{
     @Override
     @Cacheable
     public List<Table> getAllTable(String db) {
-        List<Table> results = new ArrayList<Table>();
-        String useDbName = getUseDbName(db);
-        try {
-            Iterable<String> tables = client.getAllTables(useDbName);
-            for (String table: tables) {
-                Table tmp = client.getTable(db,table);
-                results.add(tmp);
-            }
-        } catch (Exception e) {
-            reconnect();
-            LOGGER.error("Exception fetching tables info: " + e.getMessage());
-        }
-        return results;
+        return getTables(db);
     }
 
 
     @Override
     @Cacheable
-    public Map<String,List<Table>> getAllTable() {
-        Map<String,List<Table>> results = new HashMap<String, List<Table>>();
+    public Map<String, List<Table>> getAllTable() {
+        Map<String, List<Table>> results = new HashMap<String, List<Table>>();
         Iterable<String> dbs = getAllDatabases();
-        for(String db: dbs){
-            List<Table> alltables = new ArrayList<Table>();
-            String useDbName = getUseDbName(db);
-            try {
-                Iterable<String> tables = client.getAllTables(useDbName);
-                for (String table: tables) {
-                    Table tmp = client.getTable(db,table);
-                    alltables.add(tmp);
-                }
-            } catch (Exception e) {
-                reconnect();
-                LOGGER.error("Exception fetching tables info: " + e.getMessage());
-            }
-            results.put(db,alltables);
+        for (String db : dbs) {
+            results.put(db, getTables(db));
         }
         return results;
     }
@@ -134,12 +108,11 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService{
     @Cacheable
     public Table getTable(String dbName, String tableName) {
         Table result = null;
-        String useDbName = getUseDbName(dbName);
         try {
-            result = client.getTable(useDbName, tableName);
+            result = client.getTable(getUseDbName(dbName), tableName);
         } catch (Exception e) {
             reconnect();
-            LOGGER.error("Exception fetching table info : " +tableName + " : " + e.getMessage());
+            LOGGER.error("Exception fetching table info : " + tableName + " : " + e.getMessage());
         }
         return result;
     }
@@ -151,5 +124,21 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService{
             LOGGER.error("reconnect to hive failed. ");
             throw new HiveConnectionException();
         }
+    }
+
+    private List<Table> getTables(String db) {
+        String useDbName = getUseDbName(db);
+        List<Table> allTables = new ArrayList<>();
+        try {
+            Iterable<String> tables = client.getAllTables(useDbName);
+            for (String table : tables) {
+                Table tmp = client.getTable(db, table);
+                allTables.add(tmp);
+            }
+        } catch (Exception e) {
+            reconnect();
+            LOGGER.error("Exception fetching tables info: " + e.getMessage());
+        }
+        return allTables;
     }
 }

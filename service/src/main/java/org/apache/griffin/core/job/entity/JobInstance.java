@@ -36,12 +36,12 @@ public class JobInstance extends AuditableEntity {
     private String jobName;
     private int sessionId;
     @Enumerated(EnumType.STRING)
-    State state;
-    String appId;
+    private State state;
+    private String appId;
     @Lob
     @Column(length=1024) //2^10=1024
     private String appUri;
-    long timestamp;
+    private long timestamp;
 
     public String getGroupName() {
         return groupName;

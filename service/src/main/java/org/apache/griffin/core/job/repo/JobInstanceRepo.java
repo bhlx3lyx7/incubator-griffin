@@ -56,7 +56,7 @@ public interface JobInstanceRepo extends CrudRepository<JobInstance,Long>{
     @Modifying
     @Query("delete from JobInstance s " +
             "where s.groupName= ?1 and s.jobName=?2 ")
-    void deleteByGroupAndjobName(String groupName, String jobName);
+    void deleteByGroupAndJobName(String groupName, String jobName);
 
     @Transactional
     @Modifying
