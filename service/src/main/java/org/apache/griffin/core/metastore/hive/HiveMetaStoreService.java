@@ -24,7 +24,7 @@ import org.apache.hadoop.hive.metastore.api.Table;
 import java.util.List;
 import java.util.Map;
 
-public interface HiveMetastoreService {
+public interface HiveMetaStoreService {
 
     Iterable<String> getAllDatabases() ;
 

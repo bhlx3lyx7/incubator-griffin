@@ -31,9 +31,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 
 @Component
-public class HiveMetastoreProxy
+public class HiveMetaStoreProxy
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetastoreProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetaStoreProxy.class);
 
     @Value("${hive.metastore.uris}")
     private String uris;
