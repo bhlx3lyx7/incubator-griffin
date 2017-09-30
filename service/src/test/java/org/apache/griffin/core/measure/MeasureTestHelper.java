@@ -3,6 +3,9 @@ package org.apache.griffin.core.measure;
 
 import org.apache.griffin.core.measure.entity.*;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.quartz.JobDataMap;
+import org.quartz.Trigger;
+import org.quartz.impl.JobDetailImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,5 +33,23 @@ public class MeasureTestHelper {
         Rule rule = new Rule("griffin-dsl", "accuracy", rules);
         EvaluateRule evaluateRule = new EvaluateRule(Arrays.asList(rule));
         return new Measure(name, "description", org, "batch", "test", dataSources, evaluateRule);
+    }
+
+    public static JobDetailImpl createJobDetail() {
+        JobDetailImpl jobDetail = new JobDetailImpl();
+        JobDataMap jobInfoMap = new JobDataMap();
+        jobInfoMap.put("triggerState", Trigger.TriggerState.NORMAL);
+        jobInfoMap.put("measureId", "1");
+        jobInfoMap.put("sourcePattern", "YYYYMMdd-HH");
+        jobInfoMap.put("targetPattern", "YYYYMMdd-HH");
+        jobInfoMap.put("jobStartTime", "1506356105876");
+        jobInfoMap.put("interval", "3000");
+        jobInfoMap.put("deleted", "false");
+        jobInfoMap.put("blockStartTimestamp","1506634804254");
+        jobInfoMap.put("lastBlockStartTimestamp","1506634804254");
+        jobInfoMap.put("groupName","BA");
+        jobInfoMap.put("jobName","jobName");
+        jobDetail.setJobDataMap(jobInfoMap);
+        return jobDetail;
     }
 }

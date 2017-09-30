@@ -19,7 +19,6 @@ under the License.
 
 package org.apache.griffin.core.metastore.hive;
 
-import org.apache.griffin.core.error.exception.GriffinException.HiveConnectionException;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -36,19 +35,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 
 @Service
 @CacheConfig(cacheNames = "hive")
-public class HiveMetastoreServiceImpl implements HiveMetastoreService {
+public class HiveMetaStoreServiceImpl implements HiveMetaStoreService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetastoreServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetaStoreService.class);
 
     @Autowired
     private HiveMetaStoreClient client;
 
     @Value("${hive.metastore.dbname}")
     private String defaultDbName;
+
+    private ThreadPoolExecutor singleThreadExecutor;
+
+    public HiveMetaStoreServiceImpl() {
+        singleThreadExecutor = new ThreadPoolExecutor(1,1,3, TimeUnit.SECONDS,new ArrayBlockingQueue<>(1));
+        LOGGER.info("HiveMetaStoreServiceImpl single thread pool created.");
+    }
 
     private String getUseDbName(String dbName) {
         if (!StringUtils.hasText(dbName))
@@ -59,6 +66,7 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService {
 
     @Override
     @Cacheable
+
     public Iterable<String> getAllDatabases() {
         Iterable<String> results = null;
         try {
@@ -95,8 +103,11 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService {
     @Override
     @Cacheable
     public Map<String, List<Table>> getAllTable() {
-        Map<String, List<Table>> results = new HashMap<String, List<Table>>();
+        Map<String, List<Table>> results = new HashMap<>();
         Iterable<String> dbs = getAllDatabases();
+        //MetaException happens
+        if (dbs == null)
+            return results;
         for (String db : dbs) {
             results.put(db, getTables(db));
         }
@@ -117,14 +128,6 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService {
         return result;
     }
 
-    private void reconnect() {
-        try {
-            client.reconnect();
-        } catch (MetaException e) {
-            LOGGER.error("reconnect to hive failed. ");
-            throw new HiveConnectionException();
-        }
-    }
 
     private List<Table> getTables(String db) {
         String useDbName = getUseDbName(db);
@@ -140,5 +143,18 @@ public class HiveMetastoreServiceImpl implements HiveMetastoreService {
             LOGGER.error("Exception fetching tables info: " + e.getMessage());
         }
         return allTables;
+    }
+
+    private void reconnect() {
+        if(singleThreadExecutor.getActiveCount()==0) {
+            System.out.println("execute create thread.");
+            singleThreadExecutor.execute(() -> {
+                try {
+                    client.reconnect();
+                } catch (MetaException e) {
+                    LOGGER.error("reconnect to hive failed. ");
+                }
+            });
+        }
     }
 }
