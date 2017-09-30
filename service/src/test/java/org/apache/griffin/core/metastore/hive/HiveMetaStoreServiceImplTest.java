@@ -65,7 +65,8 @@ public class HiveMetaStoreServiceImplTest {
 
     @Test
     public void testGetAllDatabases() throws MetaException {
-        assertEquals(service.getAllDatabases().iterator().hasNext(), false);
+        given(client.getAllDatabases()).willReturn(Arrays.asList("default"));
+        assertEquals(service.getAllDatabases().iterator().hasNext(), true);
 
         // MetaException
         given(client.getAllDatabases()).willThrow(MetaException.class);
@@ -79,7 +80,8 @@ public class HiveMetaStoreServiceImplTest {
     @Test
     public void testGetAllTableNames() throws MetaException {
         String dbName = "default";
-        assertEquals(service.getAllTableNames(dbName).iterator().hasNext(), false);
+        given(client.getAllTables(dbName)).willReturn(Arrays.asList(dbName));
+        assertEquals(service.getAllTableNames(dbName).iterator().hasNext(), true);
 
         // MetaException
         given(client.getAllTables(dbName)).willThrow(MetaException.class);
