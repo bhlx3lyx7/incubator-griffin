@@ -54,7 +54,7 @@ public class MeasureServiceImplTest {
     private JobServiceImpl jobService;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
     }
 
     @Test
@@ -129,11 +129,16 @@ public class MeasureServiceImplTest {
     @Test
     public void testUpdateMeasure() throws Exception {
         Measure measure = createATestMeasure("view_item_hourly", "ebay");
-        //TODO
+        // RESOURCE_NOT_FOUND
+        given(measureRepo.exists(measure.getId())).willReturn(false);
+        GriffinOperationMessage message1 = service.updateMeasure(measure);
+        assertEquals(message1, GriffinOperationMessage.RESOURCE_NOT_FOUND);
+
+        //UPDATE_MEASURE_SUCCESS
         given(measureRepo.exists(measure.getId())).willReturn(true);
         given(measureRepo.save(measure)).willReturn(measure);
-        GriffinOperationMessage message = service.updateMeasure(measure);
-        assertEquals(message, GriffinOperationMessage.UPDATE_MEASURE_SUCCESS);
+        GriffinOperationMessage message2 = service.updateMeasure(measure);
+        assertEquals(message2, GriffinOperationMessage.UPDATE_MEASURE_SUCCESS);
     }
 
 

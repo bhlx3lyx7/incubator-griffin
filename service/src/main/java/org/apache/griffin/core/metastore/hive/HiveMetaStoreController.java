@@ -28,45 +28,45 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/metadata/hive")
-public class HiveMetastoreController {
+public class HiveMetaStoreController {
 
     @Autowired
-    HiveMetastoreServiceImpl hiveMetastoreService;
+    HiveMetaStoreService hiveMetaStoreService;
 
 
     @RequestMapping(value = "/db",method = RequestMethod.GET)
     public Iterable<String> getAllDatabases()  {
-        return hiveMetastoreService.getAllDatabases();
+        return hiveMetaStoreService.getAllDatabases();
     }
 
     @RequestMapping(value = "/table",method = RequestMethod.GET)
     public Iterable<String> getDefAllTables()  {
-        return hiveMetastoreService.getAllTableNames("");
+        return hiveMetaStoreService.getAllTableNames("");
     }
 
     @RequestMapping(value = "/allTableNames",method = RequestMethod.GET)
     public Iterable<String> getAllTableNames(@RequestParam("db") String dbName)  {
-        return hiveMetastoreService.getAllTableNames(dbName);
+        return hiveMetaStoreService.getAllTableNames(dbName);
     }
 
     @RequestMapping(value = "/db/allTables",method = RequestMethod.GET)
     public List<Table> getAllTables(@RequestParam("db") String dbName)  {
-        return hiveMetastoreService.getAllTable(dbName);
+        return hiveMetaStoreService.getAllTable(dbName);
     }
 
     @RequestMapping(value = "/allTables",method = RequestMethod.GET)
     public Map<String,List<Table>> getAllTables()  {
-        return hiveMetastoreService.getAllTable();
+        return hiveMetaStoreService.getAllTable();
     }
 
     @RequestMapping(value = "/default/{table}",method = RequestMethod.GET)
     public Table getDefTable(@PathVariable("table") String tableName)  {
-        return hiveMetastoreService.getTable("", tableName);
+        return hiveMetaStoreService.getTable("", tableName);
     }
 
     @RequestMapping(value = "",method = RequestMethod.GET)
     public Table getTable(@RequestParam("db") String dbName, @RequestParam("table") String tableName)  {
-        return hiveMetastoreService.getTable(dbName, tableName);
+        return hiveMetaStoreService.getTable(dbName, tableName);
     }
 
 
